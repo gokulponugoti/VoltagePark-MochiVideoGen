@@ -1,0 +1,17 @@
+FROM pytorch/pytorch:2.7.1-cuda12.6-cudnn9-runtime
+
+WORKDIR /worker
+
+COPY requirements.worker.txt .
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.worker.txt
+
+COPY mochi_src ./mochi_src
+WORKDIR /worker/mochi_src
+RUN pip install ./src
+
+WORKDIR /worker
+COPY worker_app ./worker_app
+COPY worker_app/model_runner.py ./
+
+CMD ["python3", "worker_app/worker.py"]
