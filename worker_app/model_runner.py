@@ -7,7 +7,7 @@ from genmo.mochi_preview.pipelines import (
 )
 from genmo.lib.utils import save_video
 
-# 🪵 Configure logging
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
@@ -37,11 +37,19 @@ except Exception as e:
     logger.exception("Failed to initialize pipeline.")
     raise e
 
+
 def run_inference(prompt: str, output_path: str):
     logger.info(f"Running inference for prompt: {prompt}")
     try:
+        # Ensure video is under 1 minute
+        duration_sec = 10
+        fps = 24
+        num_frames = duration_sec * fps  # 240 frames
+
+
         video = pipeline(
-            height=480, width=848, num_frames=31,
+            height=480, width=848,
+            num_frames=num_frames,
             num_inference_steps=64,
             sigma_schedule=linear_quadratic_schedule(64, 0.025),
             cfg_schedule=[4.5]*64,

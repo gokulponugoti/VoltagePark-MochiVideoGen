@@ -14,22 +14,54 @@ spec:
     spec:
       containers:
         - name: worker
-          image: localhost:5000/mochi-worker:v3
+          image: localhost:5000/mochi-worker:v5
           imagePullPolicy: Always
           env:
+            - name: HF_HOME
+              value: "/mnt/nvme/huggingface"
             - name: REDIS_HOST
               value: "redis"
+            - name: REDIS_PORT
+              value: "6379"
             - name: MOCHI_WEIGHTS_DIR
               value: "/weights"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws_access_key_id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws_secret_access_key
+            - name: AWS_REGION
+              value: "us-east-1"
+            - name: S3_BUCKET
+              value: "mochi-videos-2025"
+            - name: OUTPUT_DIR              
+              value: "/mnt/nvme/output"
           volumeMounts:
+            - name: hf-cache
+              mountPath: /mnt/nvme/huggingface
             - name: weights
               mountPath: /weights
               readOnly: true
+            - name: nvme-output
+              mountPath: /mnt/nvme/output
           resources:
             limits:
               nvidia.com/gpu: 2
       volumes:
+        - name: hf-cache
+          hostPath:
+            path: /mnt/nvme/huggingface
+            type: DirectoryOrCreate
         - name: weights
           hostPath:
             path: /home/ubuntu/mochi_weights
             type: Directory
+        - name: nvme-output
+          hostPath:
+            path: /mnt/nvme/output
+            type: DirectoryOrCreate

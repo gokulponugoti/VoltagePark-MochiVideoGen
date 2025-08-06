@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.worker.txt
 
 COPY mochi_src ./mochi_src
 WORKDIR /worker/mochi_src
-RUN pip install ./src
+RUN pip install .
 
 WORKDIR /worker
 COPY worker_app ./worker_app
